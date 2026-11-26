@@ -1,0 +1,41 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "responses": {
+      ".read": "auth != null && auth.uid === 'ozn5rEOoP6OsICcam080fkhEbaA2'",
+      ".write": "auth != null && auth.uid === 'ozn5rEOoP6OsICcam080fkhEbaA2' && !newData.exists()",
+      "$uid": {
+        ".write": "auth != null && auth.uid === $uid && auth.token.firebase.sign_in_provider === 'anonymous' && !data.exists() && newData.exists()",
+        ".validate": "newData.hasChildren(['q0','q1','q2','q3','q4','q5','q6','q7'])",
+        "q0": {
+          ".validate": "newData.isNumber() && (newData.val() === 0 || newData.val() === 1 || newData.val() === 2)"
+        },
+        "q1": {
+          ".validate": "newData.isNumber() && (newData.val() === 0 || newData.val() === 1 || newData.val() === 2)"
+        },
+        "q2": {
+          ".validate": "newData.isNumber() && (newData.val() === 0 || newData.val() === 1 || newData.val() === 2)"
+        },
+        "q3": {
+          ".validate": "newData.isNumber() && (newData.val() === 0 || newData.val() === 1 || newData.val() === 2)"
+        },
+        "q4": {
+          ".validate": "newData.isNumber() && (newData.val() === 0 || newData.val() === 1 || newData.val() === 2)"
+        },
+        "q5": {
+          ".validate": "newData.isNumber() && (newData.val() === 0 || newData.val() === 1 || newData.val() === 2)"
+        },
+        "q6": {
+          ".validate": "newData.isNumber() && (newData.val() === 0 || newData.val() === 1 || newData.val() === 2)"
+        },
+        "q7": {
+          ".validate": "newData.isNumber() && (newData.val() === 0 || newData.val() === 1 || newData.val() === 2)"
+        },
+        "$other": {
+          ".validate": false
+        }
+      }
+    }
+  }
+}
