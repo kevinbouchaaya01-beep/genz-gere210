@@ -67,8 +67,11 @@ function renderSummary() {
     <h2 tabindex="-1">Keep the conversation going</h2>
     <p>When the professor said “Because that’s the rule,” you chose: <strong>${classroomChoice}.</strong></p>
     <div class="scene" data-tone="2"><p>Try saying it with a reason</p><div class="bubble better">Please put your phones away for five minutes so everyone can hear.</div></div>
-    <p>Would hearing the reason change how you’d reply? Share what you picked for the last two questions during the class discussion.</p>
-    <p class="status" id="status" role="status">Sending your eight anonymous answers…</p>
+    <h3>Your discussion picks</h3>
+    <p><strong>How you’d like to hear a rule</strong><br>${scenes[8][4][choices[8]]}</p>
+    <p><strong>How you’d speak up in a group</strong><br>${scenes[9][4][choices[9]]}</p>
+    <p>Compare your picks when the class talks through questions 9 and 10.</p>
+    <p class="status" id="status" role="status">Saving your anonymous responses…</p>
     <button class="primary" id="retry" hidden>Try sending again</button>`;
   app.querySelector('h2').focus({ preventScroll: true });
   app.querySelector('#retry').onclick = submit;
@@ -81,7 +84,7 @@ async function submit() {
   const status = app.querySelector('#status');
   const retry = app.querySelector('#retry');
   retry.hidden = true;
-  status.textContent = 'Sending your eight anonymous answers…';
+  status.textContent = 'Saving your anonymous responses…';
   try {
     await auth.authStateReady();
     const user = auth.currentUser || (await signInAnonymously(auth)).user;
@@ -91,7 +94,7 @@ async function submit() {
     }
     const response = Object.fromEntries(choices.slice(0, LIVE_QUESTION_COUNT).map((value, index) => ['q' + index, value]));
     await set(ref(db, 'responses/' + user.uid), response);
-    status.textContent = 'Answers sent. You’re included in the classroom results.';
+    status.textContent = 'Quiz complete! Your anonymous responses are in the class results.';
   } catch (error) {
     if (error.code === 'PERMISSION_DENIED' || error.code === 'database/permission-denied') {
       status.textContent = 'We couldn’t add your answers. You may already have submitted from this browser.';
