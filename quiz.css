@@ -43,3 +43,14 @@ footer{border-top:1px solid #c4b8d6;font-size:.9rem;padding:1rem 0 1.4rem}footer
 @keyframes arrive{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 @media(max-width:650px){.hero{grid-template-columns:1fr;padding:2rem 0}.demo{transform:none}.quiz{box-shadow:3px 3px 0}.demo .bubble{font-size:.94rem}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}button:hover{transform:none}}
+
+.quiz{scroll-margin-block-start:1rem}
+.choice.picked{background:var(--lime)}
+.reveal{display:grid;grid-template-columns:1fr auto;align-items:center;gap:1rem;padding:clamp(1rem,4vw,2rem);background:var(--lav);border:2px solid;border-radius:18px;animation:arrive .28s ease-out}
+.reveal p:last-child{margin:0}.reveal h2{font:700 clamp(2.2rem,6vw,3.5rem)/.98 Georgia,serif;color:#392772}
+.score{font:700 clamp(2.9rem,11vw,5.5rem)/1 Georgia,serif;letter-spacing:-.085em;padding:.5rem .75rem .6rem;border:2px solid;border-radius:14px;background:var(--lime);box-shadow:4px 4px 0;transform:rotate(4deg)}
+.score span{font-size:.49em;letter-spacing:0;margin-left:.08em}
+.score-scale{margin:1.2rem 0 0;font-size:.9rem}.score-scale span{margin:0 .24rem}
+.picks{display:grid;grid-template-columns:1fr 1fr;gap:.65rem}.picks>div{padding:.8rem;border-radius:12px;background:var(--sky)}.picks>div+div{background:var(--pink)}
+.picks .bubble{margin-bottom:0;max-width:100%}
+@media(max-width:410px){.reveal{grid-template-columns:1fr}.score{grid-row:1;justify-self:start}.picks{grid-template-columns:1fr}}

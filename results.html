@@ -1,23 +1,97 @@
-<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Live classroom results</title><style> *{box-sizing:border-box}body{font:17px system-ui;background:linear-gradient(120deg,#ffd1e2,#fff9f1,#dcd0ff);color:#24213d;margin:0}main{max-width:1100px;margin:auto;padding:32px 20px}h1{font-size:clamp(32px,5vw,58px);letter-spacing:-.05em}section,article{background:#fffdf9;border:2px solid #24213d;border-radius:20px;padding:20px;margin:16px 0;box-shadow:4px 4px #24213d}input,button{font:inherit;padding:12px;border:2px solid #24213d;border-radius:12px;margin:5px}button{background:#d8f68b;cursor:pointer}input{max-width:100%}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}.bar{background:#eee4ff;border-radius:12px;height:14px;overflow:hidden}.bar i{display:block;height:100%;background:#6746b5}.metric{font-size:42px;font-weight:800;color:#6746b5}small{color:#6746b5;font-weight:bold}
- .readout{background:#e8ddff}.readout h2{margin-top:0}.news{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px}.news div{border:1.5px solid;border-radius:14px;background:#fffdf9;padding:14px}.news p{margin:0}.news .metric{font-size:clamp(30px,5vw,52px);line-height:1.2;margin-bottom:.35rem}.readout-note{margin-bottom:0;font-size:1rem}.option{display:flex;gap:.5rem;justify-content:space-between;align-items:baseline}.option span{font-size:.9rem;white-space:nowrap}.story{background:#d8f68b}</style><main><small>GERE 210 · DR. RANIA SKAILY</small><h1>Our classroom, decoded.</h1><p>Kevin Bou Chaaya &amp; Christina Elias · Live results</p><section id="login"><form id="form"><label>Email <input id="email" type="email" required></label><label>Password <input id="password" type="password" required></label><button>Presenter sign in</button></form></section><p id="status" role="status"></p><div id="panel" hidden><button id="logout">Sign out</button><button id="reset">Reset responses</button><section class="readout" aria-labelledby="readout-title"><h2 id="readout-title">Read it out loud</h2><div class="news" id="readout"><p>Waiting for class responses…</p></div><p class="readout-note">A percentage tells you how many people out of 100 would have picked that reply if the class answered in the same proportions. The count shows how many people in this room actually picked it.</p></section><h2>How the class answered</h2><div class="grid" id="questions"></div></div><p>These totals cover questions 1–8. Questions 9 and 10 are for class discussion. Percentages are rounded.</p></main><script type="module">import {auth,db,signInWithEmailAndPassword,signOut,onAuthStateChanged,ref,onValue,remove} from './firebase.js?v=2';import { scenes, LIVE_QUESTION_COUNT } from './scenes.js?v=6';const qs = scenes.slice(0, LIVE_QUESTION_COUNT).map(([topic,situation,message,,answers]) => [topic, situation + ' “' + message + '”', answers]);const $=id=>document.getElementById(id);const uid='ozn5rEOoP6OsICcam080fkhEbaA2';let stop;const path=ref(db,'responses');$('form').onsubmit=async e=>{e.preventDefault();try{await signInWithEmailAndPassword(auth,$('email').value,$('password').value);$('password').value='';}catch(e){$('status').textContent=e.message;}};$('logout').onclick=()=>signOut(auth);$('reset').onclick=async()=>{if(confirm('Permanently delete all classroom responses?'))try{await remove(path)}catch(e){$('status').textContent=e.message}};function percentage(count, total) {
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Live classroom results</title><style>
+*{box-sizing:border-box}body{margin:0;background:#f8f5ed;color:#211a39;font:1rem/1.55 system-ui,sans-serif}
+main{max-width:70rem;margin:auto;padding:clamp(1rem,4vw,3rem)}
+small{font-weight:850;letter-spacing:.08em;color:#593bb5}
+h1{font:700 clamp(2.8rem,8vw,5.6rem)/.95 Georgia,serif;letter-spacing:-.065em;margin:.35em 0 .25em}
+h2{line-height:1.15}h3{line-height:1.2}p{margin:.65em 0}
+button,input{font:inherit;padding:.6rem .9rem;border:1.5px solid;border-radius:10px;color:inherit}
+button{background:#fffdf8;cursor:pointer;font-weight:750;min-height:44px}button:hover{background:#d9f58b}
+button:focus-visible,input:focus-visible{outline:3px solid #593bb5;outline-offset:3px}
+#login{background:#fffdf8;padding:1rem;border:1.5px solid;border-radius:12px}#form,.actions,.stage-actions{display:flex;flex-wrap:wrap;align-items:center;gap:.55rem}input{max-width:100%}
+.actions{justify-content:flex-end;margin-bottom:1rem}#status{font-size:.9rem}
+.readout{background:#e3d8ff;border:2px solid;border-radius:24px;box-shadow:5px 5px 0;padding:clamp(1rem,4vw,2rem);margin:1rem 0 2rem}
+.stage-heading{display:flex;gap:.6rem 1rem;justify-content:space-between;align-items:center;flex-wrap:wrap}.stage-heading h2{margin:0}
+#participants{padding:.25rem .75rem;background:#fffdf8;border:1px solid;border-radius:20px;font-weight:750;font-size:.875rem}
+#readout{margin:1rem 0;background:#2b1d49;color:#fffdf8;border-radius:17px;padding:clamp(1rem,4vw,2.1rem)}
+#readout h3{font:700 clamp(1.8rem,5vw,3.4rem)/1 Georgia,serif;margin:.15em 0 .55em;letter-spacing:-.03em}
+#readout .round{font-weight:750;color:#e3d8ff;font-size:.9rem}
+.metric{display:inline-block;font:700 clamp(3rem,8vw,6rem)/1 Georgia,serif;color:#211a39;background:#d9f58b;padding:.1em .22em;border-radius:9px;letter-spacing:-.07em;transform:rotate(-3deg)}
+#readout .line{font-size:clamp(1.1rem,3vw,1.65rem);font-weight:700;max-width:40ch}
+#readout .ask{color:#ffe0eb}.stage-actions .primary{background:#d9f58b}.stage-actions button[aria-current=true]{background:#2b1d49;color:#fffdf8}
+.stage-actions[hidden]{display:none}.readout-note{font-size:.9rem;margin-top:1rem}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,250px),1fr));gap:1rem}
+article{background:#fffdf8;border:1.5px solid;border-radius:15px;padding:1rem}
+.bar{background:#eae1fb;border-radius:12px;height:10px;overflow:hidden}.bar i{display:block;height:100%;background:#6746b5}
+.option{display:flex;gap:.5rem;justify-content:space-between;align-items:baseline}.option span{font-size:.875rem;white-space:nowrap}
+.visually-hidden{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+</style><main><small>GERE 210 · DR. RANIA SKAILY</small><h1>Our classroom, decoded.</h1><p>Kevin Bou Chaaya &amp; Christina Elias · Live results</p><section id="login"><form id="form"><label>Email <input id="email" type="email" required></label><label>Password <input id="password" type="password" required></label><button>Presenter sign in</button></form></section><p id="status" role="status"></p><div id="panel" hidden><div class="actions"><button id="logout">Sign out</button><button id="reset">Reset responses</button></div>
+<section class="readout" aria-labelledby="readout-title">
+  <div class="stage-heading"><h2 id="readout-title">Read it out loud</h2><span id="participants" hidden></span></div>
+  <div id="readout"><p>Waiting for class responses…</p></div>
+  <div class="stage-actions" id="stage-actions" hidden>
+    <button class="primary" id="reveal-stat" aria-controls="readout" aria-expanded="false">Reveal answer</button>
+    <button id="story-rule" aria-current="true">The classroom rule</button>
+    <button id="story-text" aria-current="false">The “Okay.” text</button>
+  </div>
+  <p class="readout-note">The percentage is the share of this class who picked a reply. The count tells you how many people that was.</p>
+</section><h2>How the class answered</h2><div class="grid" id="questions"></div></div><p>These totals cover questions 1–8. Questions 9 and 10 are for class discussion. Percentages are rounded.</p></main><script type="module">import {auth,db,signInWithEmailAndPassword,signOut,onAuthStateChanged,ref,onValue,remove} from './firebase.js?v=2';import { scenes, LIVE_QUESTION_COUNT } from './scenes.js?v=6';const qs = scenes.slice(0, LIVE_QUESTION_COUNT).map(([topic,situation,message,,answers]) => [topic, situation + ' “' + message + '”', answers]);const $=id=>document.getElementById(id);const uid='ozn5rEOoP6OsICcam080fkhEbaA2';let stop;const path=ref(db,'responses');$('form').onsubmit=async e=>{e.preventDefault();try{await signInWithEmailAndPassword(auth,$('email').value,$('password').value);$('password').value='';}catch(e){$('status').textContent=e.message;}};$('logout').onclick=()=>signOut(auth);$('reset').onclick=async()=>{if(confirm('Permanently delete all classroom responses?'))try{await remove(path)}catch(e){$('status').textContent=e.message}};function percentage(count, total) {
    return total ? Math.round(count / total * 100) : 0;
  }
  function bar(label, count, total) {
    const percent = percentage(count, total);
    return `<p class="option"><strong>${label}</strong><span>${total ? percent + '% · ' + count + '/' + total : '—'}</span></p><div class="bar" aria-hidden="true"><i style="width:${percent}%"></i></div>`;
  }
- function renderReadout(rows) {
-   const total = rows.length;
+ let classroomRows = [];
+ let story = 0;
+ let revealed = false;
+ const stories = [
+   {
+     title: 'Would you ask why?',
+     guess: 'Before we reveal it, guess how many people would ask for a reason, either right away or after class.',
+     includes: row => row.q2 === 1 || row.q2 === 2,
+     say: 'would ask for a reason, either right away or after class.',
+     ask: 'Would you still ask why if you heard the reason right away?'
+   },
+   {
+     title: 'Can a period change the mood?',
+     guess: 'Guess how many people wondered what the period meant in the text “Okay.”',
+     includes: row => row.q0 === 2,
+     say: 'would wonder what the period in “Okay.” meant.',
+     ask: 'What would make that text sound friendlier to you?'
+   }
+ ];
+ const storyButtons = [$('story-rule'), $('story-text')];
+ storyButtons.forEach((button, index) => {
+   button.onclick = () => {
+     if (story === index) return;
+     story = index;
+     revealed = false;
+     renderReadout();
+   };
+ });
+ $('reveal-stat').onclick = () => {
+   revealed = !revealed;
+   renderReadout();
+ };
+ function renderReadout() {
+   const total = classroomRows.length;
+   $('participants').hidden = $('stage-actions').hidden = total === 0;
    if (!total) {
+     revealed = false;
      $('readout').innerHTML = '<p>Waiting for the first response. The class stats will appear here.</p>';
      return;
    }
-   const askedWhy = rows.filter(row => row.q2 === 1 || row.q2 === 2).length;
-   const readIntoOkay = rows.filter(row => row.q0 === 2).length;
-   const studentWord = total === 1 ? 'person has' : 'people have';
+   $('participants').textContent = total === 1 ? '1 response' : total + ' responses';
+   $('reveal-stat').textContent = revealed ? 'Hide answer' : 'Reveal answer';
+   $('reveal-stat').setAttribute('aria-expanded', revealed);
+   storyButtons.forEach((button, index) => button.setAttribute('aria-current', story === index));
+   const highlight = stories[story];
+   const count = classroomRows.filter(highlight.includes).length;
    $('readout').innerHTML = `
-     <div><p class="metric">${total}</p><p>“So far, ${total} ${studentWord} answered.”</p></div>
-     <div><p class="metric">${percentage(askedWhy, total)}%</p><p>“${askedWhy} out of ${total} would ask why, either in class or after.”</p></div>
-     <div><p class="metric">${percentage(readIntoOkay, total)}%</p><p>“${readIntoOkay} out of ${total} wondered what the period in ‘Okay.’ meant.”</p></div>
-     <div class="story"><p><strong>Ask the room</strong></p><p>“Would you still ask why if you heard the reason right away?”</p></div>`;
- }function render(snapshot){const rows=Object.values(snapshot.val()||{}).filter(x=>x&&qs.every((_,i)=>Number.isInteger(x['q'+i])&&x['q'+i]>=0&&x['q'+i]<=2));const n=rows.length;renderReadout(rows);$('questions').innerHTML=qs.map(([topic,question,answers],i)=>'<article><small>QUESTION '+(i+1)+'</small><h3>'+topic+'</h3><p>'+question+'</p>'+answers.map((a,j)=>bar(a,rows.filter(x=>x['q'+i]===j).length,n)).join('')+'</article>').join('');$('status').textContent='Listening for live responses.'}onAuthStateChanged(auth,u=>{if(stop){stop();stop=null}$('panel').hidden=true;$('login').hidden=false;$('status').textContent='';if(!u)return;if(u.uid!==uid){$('status').textContent='Presenter account required.';return}$('panel').hidden=false;$('login').hidden=true;stop=onValue(path,render,e=>{$('status').textContent=e.message})});</script></html>
+     <p class="round">${revealed ? 'THE CLASS SAID' : 'GUESS THE RESULT'}</p>
+     <h3>${highlight.title}</h3>
+     ${revealed
+       ? `<div class="metric">${percentage(count, total)}%</div><p class="line">“${count} out of ${total} ${highlight.say}”</p><p class="ask"><strong>Ask the room</strong> · “${highlight.ask}”</p>`
+       : `<p class="line">“${highlight.guess}”</p>`}
+   `;
+ }function render(snapshot){const rows=Object.values(snapshot.val()||{}).filter(x=>x&&qs.every((_,i)=>Number.isInteger(x['q'+i])&&x['q'+i]>=0&&x['q'+i]<=2));const n=rows.length;classroomRows=rows;renderReadout();$('questions').innerHTML=qs.map(([topic,question,answers],i)=>'<article><small>QUESTION '+(i+1)+'</small><h3>'+topic+'</h3><p>'+question+'</p>'+answers.map((a,j)=>bar(a,rows.filter(x=>x['q'+i]===j).length,n)).join('')+'</article>').join('');$('status').textContent='Listening for live responses.'}onAuthStateChanged(auth,u=>{if(stop){stop();stop=null}$('panel').hidden=true;$('login').hidden=false;$('status').textContent='';if(!u)return;if(u.uid!==uid){$('status').textContent='Presenter account required.';return}$('panel').hidden=false;$('login').hidden=true;stop=onValue(path,render,e=>{$('status').textContent=e.message})});</script></html>

@@ -9,7 +9,7 @@ let sending = false;
 document.querySelector('#start').onclick = renderScene;
 
 function renderScene() {
-  const [topic, situation, message, prompt, answers, tip] = scenes[current];
+  const [topic, situation, message, prompt, answers] = scenes[current];
   app.className = 'quiz';
   app.innerHTML = `
     <p class="eyebrow">QUESTION ${current + 1} OF ${scenes.length} · ${topic.toUpperCase()}${current >= LIVE_QUESTION_COUNT ? " · DISCUSSION" : ""}</p>
@@ -17,14 +17,8 @@ function renderScene() {
     <div class="scene" data-tone="${current % 4}"><p>${situation}</p><div class="bubble">${message}</div></div>
     <h2 id="question" tabindex="-1">${prompt}</h2>
     <div class="choices" role="group" aria-labelledby="question"></div>
-    <p class="feedback" hidden>${tip}</p>
-    <div class="controls"><button class="quiet" id="back" ${current === 0 ? 'hidden' : ''}>Back</button>
-    <button class="primary" id="next" hidden>${current === scenes.length - 1 ? 'Finish quiz' : 'Next question'}</button></div>`;
-  const buttons = [];
-  const next = app.querySelector('#next');
-  const feedback = app.querySelector('.feedback');
-  feedback.setAttribute('aria-live', 'polite');
-
+    <div class="controls"><button class="quiet" id="back" ${current === 0 ? 'hidden' : ''}>Back</button></div>`;
+  const questionIndex = current;
   for (let position = 0; position < answers.length; position++) {
     const index = (position + current + 1) % answers.length;
     const button = document.createElement('button');
@@ -32,48 +26,47 @@ function renderScene() {
     button.innerHTML = `<span aria-hidden="true">${'ABC'[position]}</span>`;
     button.append(document.createTextNode(answers[index]));
     button.dataset.index = index;
+    if (choices[current] === index) button.classList.add('picked');
     button.onclick = () => {
+      if (current !== questionIndex) return;
       choices[current] = index;
-      showChoice();
+      current++;
+      if (current === scenes.length) renderSummary();
+      else renderScene();
     };
-    buttons.push(button);
     app.querySelector('.choices').append(button);
   }
-
-  function showChoice() {
-    const picked = choices[current];
-    buttons.forEach(button => button.setAttribute('aria-pressed', Number(button.dataset.index) === picked));
-    next.hidden = feedback.hidden = picked === undefined;
-  }
-  showChoice();
 
   app.querySelector('#back').onclick = () => {
     current--;
     renderScene();
   };
-  next.onclick = () => {
-    if (choices[current] === undefined) return;
-    current++;
-    if (current === scenes.length) renderSummary();
-    else renderScene();
-  };
   app.querySelector('#question').focus({ preventScroll: true });
+  app.scrollIntoView({block:'start'});
 }
 
 function renderSummary() {
-  const classroomChoice = scenes[2][4][choices[2]];
+  const points = choices.slice(0, LIVE_QUESTION_COUNT).reduce((sum, value) => sum + value, 0);
+  const score = Math.round(points / (LIVE_QUESTION_COUNT * 2) * 100);
+  const [profile, description] = score >= 70
+    ? ['The expressive connector', 'You tend to ask what people mean, talk things through, and show how you feel.']
+    : score >= 40
+      ? ['The generation bridge', 'You switch between keeping it simple and opening up the conversation.']
+      : ['The straightforward communicator', 'You tend to keep things clear, practical, and to the point.'];
   app.innerHTML = `
-    <p class="eyebrow">QUIZ COMPLETE</p>
-    <h2 tabindex="-1">Keep the conversation going</h2>
-    <p>When the professor said “Because that’s the rule,” you chose: <strong>${classroomChoice}.</strong></p>
-    <div class="scene" data-tone="2"><p>Try saying it with a reason</p><div class="bubble better">Please put your phones away for five minutes so everyone can hear.</div></div>
-    <h3>Your discussion picks</h3>
-    <p><strong>How you’d like to hear a rule</strong><br>${scenes[8][4][choices[8]]}</p>
-    <p><strong>How you’d speak up in a group</strong><br>${scenes[9][4][choices[9]]}</p>
-    <p>Compare your picks when the class talks through questions 9 and 10.</p>
+    <div class="reveal">
+      <div><p class="eyebrow">YOUR GEN Z MATCH</p><h2 tabindex="-1">${profile}</h2><p>${description}</p></div>
+      <div class="score" aria-label="${score} percent match">${score}<span>%</span></div>
+    </div>
+    <p class="score-scale"><strong>0–39%</strong> Straightforward <span>·</span> <strong>40–69%</strong> Bridge <span>·</span> <strong>70–100%</strong> Expressive</p>
+    <p class="privacy">A playful match based on your first eight replies. Every style has its place.</p>
+    <h3>Two replies to bring to class</h3>
+    <div class="picks"><div><strong>How you’d like to hear a rule</strong><div class="bubble">${scenes[8][4][choices[8]]}</div></div>
+    <div><strong>How you’d speak up in a group</strong><div class="bubble">${scenes[9][4][choices[9]]}</div></div></div>
     <p class="status" id="status" role="status">Saving your anonymous responses…</p>
     <button class="primary" id="retry" hidden>Try sending again</button>`;
   app.querySelector('h2').focus({ preventScroll: true });
+  app.scrollIntoView({block:'start'});
   app.querySelector('#retry').onclick = submit;
   submit();
 }
