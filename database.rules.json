@@ -3,7 +3,7 @@
     ".read": false,
     ".write": false,
     "responses": {
-      ".read": "auth != null && auth.uid === 'ozn5rEOoP6OsICcam080fkhEbaA2'",
+      ".read": "auth != null && (auth.uid === 'ozn5rEOoP6OsICcam080fkhEbaA2' || auth.uid === 'Co1lw0iI9qfu7NTkdczy5JopTWD2')",
       ".write": "auth != null && auth.uid === 'ozn5rEOoP6OsICcam080fkhEbaA2' && !newData.exists()",
       "$uid": {
         ".write": "auth != null && auth.uid === $uid && auth.token.firebase.sign_in_provider === 'anonymous' && !data.exists() && newData.exists()",
